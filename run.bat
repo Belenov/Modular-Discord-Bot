@@ -1,0 +1,6 @@
+@echo off
+echo Running main.py...
+python main.py
+echo.
+echo Press any key to exit...
+pause > nul
