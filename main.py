@@ -14,10 +14,10 @@ from discord.ext import commands
 logging.basicConfig(level=logging.INFO)
 colorama.init(autoreset=True)
 logger = logging.getLogger(__name__)
-CONFIG_PATH = os.getenv("DISORD_CONFIG_PATH", "./config/config.json")
+CONFIG_PATH = os.getenv("DISORD_CONFIG_PATH", "./settings/config.yaml")
 # Load the config file and retrieve the token
 with open(CONFIG_PATH) as config_file:
-    CONFIG = yaml.load(config_file)
+    CONFIG = yaml.safe_load(config_file)
 token = CONFIG["token"]
 
 
@@ -55,16 +55,13 @@ async def load():
 
 
 def load_module_state():
-    try:
-        with open("./config/module_state.json", "r") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {}
+    with open("./settings/module_state.yaml", "a+") as file:
+        return yaml.safe_load(file)
 
 
 def save_module_state(state):
-    with open("./config/module_state.json", "w") as file:
-        json.dump(state, file)
+    with open("./settings/module_state.yaml", "w+") as file:
+        yaml.dump(state, file)
 
 
 @bot.event

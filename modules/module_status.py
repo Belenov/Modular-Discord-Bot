@@ -1,4 +1,4 @@
-import json
+import yaml
 import os
 
 import discord
@@ -8,8 +8,8 @@ from discord.ext import commands
 class ModuleStatus(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        with open("./config/module_descriptions.json", "r", encoding="utf-8") as f:
-            self.module_descriptions = json.load(f)
+        with open("./settings/module_descriptions.yaml", "r+") as f:
+            self.module_descriptions = yaml.load(f)
 
     @commands.command(name="modstatus")
     async def mod_status(self, ctx):
