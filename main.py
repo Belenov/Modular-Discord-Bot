@@ -1,25 +1,20 @@
 # Стандартные библиотеки
+import asyncio
 import json
 import logging
 import os
-import sys
-import asyncio
+
+import colorama
 # Сторонние библиотеки
 import discord
-from discord.ext import commands
-import importlib
-import colorama
 from colorama import Fore, Style
+from discord.ext import commands
 
-
-
-
-print(sys.path)
 logging.basicConfig(level=logging.INFO)
 colorama.init(autoreset=True)
 
 # Load the config file and retrieve the token
-with open(f'C:[your_path]/python3/config/config.json') as config_file:
+with open(f"C:[your_path]/python3/config/config.json") as config_file:
     config = json.load(config_file)
 token = config["Token"]
 
@@ -30,35 +25,52 @@ intents.message_content = True
 intents.messages = True
 
 # Create an instance of a bot
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
+
 
 async def load():
     module_state = load_module_state()
-    for filename in os.listdir('./modules'):
-        if filename.endswith('.py'):
+    for filename in os.listdir("./modules"):
+        if filename.endswith(".py"):
             module_name = filename[:-3]
-            if module_state.get(module_name) != 'unloaded':
+            if module_state.get(module_name) != "unloaded":
                 try:
-                    await bot.load_extension(f'modules.{module_name}')
-                    print(Fore.BLUE + Style.BRIGHT + '[modules]' + Style.RESET_ALL + f' Modules {module_name} working')
+                    await bot.load_extension(f"modules.{module_name}")
+                    print(
+                        Fore.BLUE
+                        + Style.BRIGHT
+                        + "[modules]"
+                        + Style.RESET_ALL
+                        + f" Modules {module_name} working"
+                    )
                 except Exception as e:
-                    print(Fore.RED + '[modules]' + Style.RESET_ALL + f' Not working {module_name}: {e}')
+                    print(
+                        Fore.RED
+                        + "[modules]"
+                        + Style.RESET_ALL
+                        + f" Not working {module_name}: {e}"
+                    )
 
 
 def load_module_state():
     try:
-        with open('./config/module_state.json', 'r') as file:
+        with open("./config/module_state.json", "r") as file:
             return json.load(file)
     except FileNotFoundError:
         return {}
 
+
 def save_module_state(state):
-    with open('./config/module_state.json', 'w') as file:
+    with open("./config/module_state.json", "w") as file:
         json.dump(state, file)
+
 
 @bot.event
 async def on_ready():
-    print(Fore.GREEN + Style.BRIGHT + f'Logged in as {bot.user.name} (ID: {bot.user.id})')
+    print(
+        Fore.GREEN + Style.BRIGHT + f"Logged in as {bot.user.name} (ID: {bot.user.id})"
+    )
+
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -67,49 +79,50 @@ async def on_command_error(ctx, error):
     raise error
 
 
-@bot.command(name='reload')
+@bot.command(name="reload")
 @commands.is_owner()
 async def reload(ctx, extension):
-    if os.path.isfile(f'./modules/{extension}.py'):
+    if os.path.isfile(f"./modules/{extension}.py"):
         try:
-            await bot.unload_extension(f'modules.{extension}')
-            await bot.load_extension(f'modules.{extension}')
-            await ctx.send(f'Модуль {extension} был перезагружен.')
+            await bot.unload_extension(f"modules.{extension}")
+            await bot.load_extension(f"modules.{extension}")
+            await ctx.send(f"Модуль {extension} был перезагружен.")
         except Exception as e:
-            await ctx.send(f'Ошибка при перезагрузке модуля: {e}')
+            await ctx.send(f"Ошибка при перезагрузке модуля: {e}")
 
-@bot.command(name='load')
+
+@bot.command(name="load")
 @commands.is_owner()
 async def loads(ctx, extension):
-    if os.path.isfile(f'./modules/{extension}.py'):
+    if os.path.isfile(f"./modules/{extension}.py"):
         try:
-            await bot.load_extension(f'modules.{extension}')
-            await ctx.send(f'Модуль {extension} загружен.')
+            await bot.load_extension(f"modules.{extension}")
+            await ctx.send(f"Модуль {extension} загружен.")
         except Exception as e:
-            await ctx.send(f'Ошибка при загрузке модуля: {e}')
+            await ctx.send(f"Ошибка при загрузке модуля: {e}")
     else:
-        await ctx.send(f'Модуль {extension} не найден.')
+        await ctx.send(f"Модуль {extension} не найден.")
     state = load_module_state()
-    state[extension] = 'loaded'
+    state[extension] = "loaded"
     save_module_state(state)
 
-@bot.command(name='unload')
+
+@bot.command(name="unload")
 @commands.is_owner()
 async def unload(ctx, extension):
     try:
-        await bot.unload_extension(f'modules.{extension}')
-        await ctx.send(f'Модуль {extension} выгружен.')
+        await bot.unload_extension(f"modules.{extension}")
+        await ctx.send(f"Модуль {extension} выгружен.")
     except Exception as e:
-        await ctx.send(f'Ошибка при выгрузке модуля: {e}')
+        await ctx.send(f"Ошибка при выгрузке модуля: {e}")
     state = load_module_state()
-    state[extension] = 'unloaded'
+    state[extension] = "unloaded"
     save_module_state(state)
-
-
 
 
 async def main():
     await load()
     await bot.start(token)
+
 
 asyncio.run(main())

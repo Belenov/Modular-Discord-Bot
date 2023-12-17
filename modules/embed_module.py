@@ -1,7 +1,8 @@
 # modules/embed_module.py
+from discord import ButtonStyle, Embed
 from discord.ext import commands
-from discord import Embed, ButtonStyle
 from discord.ui import Button, View
+
 
 class EmbedCommands(commands.Cog):
     def __init__(self, bot):
@@ -9,12 +10,15 @@ class EmbedCommands(commands.Cog):
 
     @commands.command(name="sendembed")
     async def send_embed(self, ctx):
-        embed = Embed(title="Test", description="Test", color=0x00ff00)
-        embed.set_image(url="https://starwalk.space/gallery/images/what-is-space/1920x1080.jpg")
+        embed = Embed(title="Test", description="Test", color=0x00FF00)
+        embed.set_image(
+            url="https://starwalk.space/gallery/images/what-is-space/1920x1080.jpg"
+        )
         view = View()
         view.add_item(Button(label="Button 1", style=ButtonStyle.primary))
         view.add_item(Button(label="Button 2", style=ButtonStyle.secondary))
         await ctx.send(embed=embed, view=view)
+
 
 async def setup(bot):
     await bot.add_cog(EmbedCommands(bot))
