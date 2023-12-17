@@ -1,10 +1,11 @@
 # Стандартные библиотеки
 import asyncio
-import json
+import yaml
 import logging
 import os
 
 import colorama
+
 # Сторонние библиотеки
 import discord
 from colorama import Fore, Style
@@ -12,11 +13,12 @@ from discord.ext import commands
 
 logging.basicConfig(level=logging.INFO)
 colorama.init(autoreset=True)
-
+logger = logging.getLogger(__name__)
+CONFIG_PATH = os.getenv("DISORD_CONFIG_PATH", "./config/config.json")
 # Load the config file and retrieve the token
-with open(f"C:[your_path]/python3/config/config.json") as config_file:
-    config = json.load(config_file)
-token = config["Token"]
+with open(CONFIG_PATH) as config_file:
+    CONFIG = yaml.load(config_file)
+token = CONFIG["token"]
 
 
 # Устанавливаем параметры намерений (intents) для бота
@@ -36,7 +38,7 @@ async def load():
             if module_state.get(module_name) != "unloaded":
                 try:
                     await bot.load_extension(f"modules.{module_name}")
-                    print(
+                    logger.info(
                         Fore.BLUE
                         + Style.BRIGHT
                         + "[modules]"
@@ -44,7 +46,7 @@ async def load():
                         + f" Modules {module_name} working"
                     )
                 except Exception as e:
-                    print(
+                    logger.info(
                         Fore.RED
                         + "[modules]"
                         + Style.RESET_ALL
@@ -67,7 +69,7 @@ def save_module_state(state):
 
 @bot.event
 async def on_ready():
-    print(
+    logger.info(
         Fore.GREEN + Style.BRIGHT + f"Logged in as {bot.user.name} (ID: {bot.user.id})"
     )
 

@@ -1,7 +1,0 @@
-{
-    "embed_module": "loaded", 
-    "hello_cog": "unloaded", 
-    "module_status": "loaded", 
-    "dropdown_menu": "loaded"
-}//Select which modules to start at the start and which to unload
-
