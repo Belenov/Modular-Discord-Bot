@@ -5,11 +5,12 @@ import discord
 from discord.ext import commands
 
 
-class ModuleStatus(commands.Cog):
+class Status(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.description = "I'ma status module!"
         with open("./settings/module_descriptions.yaml", "r+") as f:
-            self.module_descriptions = yaml.load(f)
+            self.module_descriptions = yaml.safe_load(f)
 
     @commands.command(name="modstatus")
     async def mod_status(self, ctx):
@@ -33,4 +34,4 @@ class ModuleStatus(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(ModuleStatus(bot))
+    await bot.add_cog(Status(bot))

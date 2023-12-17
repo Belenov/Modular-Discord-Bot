@@ -25,19 +25,33 @@ token = CONFIG["token"]
 intents = discord.Intents.all()
 intents.message_content = True
 intents.messages = True
+intents.members = True
 
 # Create an instance of a bot
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 async def load():
-    module_state = load_module_state()
+    module_states = load_module_state()
+    if not module_states:
+        # Если нет файла модулей то первый раз нужно его сделать
+        module_states = {}
+    module_descriptions = {}
     for filename in os.listdir("./modules"):
         if filename.endswith(".py"):
             module_name = filename[:-3]
-            if module_state.get(module_name) != "unloaded":
+            if not module_states.get(module_name):
+                # Все модули загружаются по умолчанию
+                module_states[module_name] = "loaded"
+                # Дампим состояние всех модулей после загрузки каждого
+                save_module_state(module_states)
+            if module_states.get(module_name, "loaded") != "unloaded":
                 try:
                     await bot.load_extension(f"modules.{module_name}")
+                    # Сделаем обработку созданного кога
+                    cogi = bot.get_cog(module_name.capitalize())
+                    # Сохраним его описание в файл из кода
+                    module_descriptions[module_name] = cogi.description
                     logger.info(
                         Fore.BLUE
                         + Style.BRIGHT
@@ -52,6 +66,7 @@ async def load():
                         + Style.RESET_ALL
                         + f" Not working {module_name}: {e}"
                     )
+    save_module_descriptions(module_descriptions)
 
 
 def load_module_state():
@@ -62,6 +77,12 @@ def load_module_state():
 def save_module_state(state):
     with open("./settings/module_state.yaml", "w+") as file:
         yaml.dump(state, file)
+
+
+def save_module_descriptions(module_descriptions):
+    file_path = "./settings/module_descriptions.yaml"
+    with open(file_path, "w+") as f:
+        yaml.dump(module_descriptions, f)
 
 
 @bot.event

@@ -26,9 +26,10 @@ class DropdownView(discord.ui.View):
         self.add_item(Dropdown())
 
 
-class DropdownMenuCog(commands.Cog):
+class Dropdownmenu(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.description = "I'ma embedded cog!"
 
     @commands.command()
     async def menu(self, ctx):
@@ -37,4 +38,4 @@ class DropdownMenuCog(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(DropdownMenuCog(bot))
+    await bot.add_cog(Dropdownmenu(bot))
