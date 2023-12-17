@@ -32,7 +32,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 async def load():
-    module_states = load_module_state()
+    module_states = load_modules_states()
     if not module_states:
         # Если нет файла модулей то первый раз нужно его сделать
         module_states = {}
@@ -44,7 +44,7 @@ async def load():
                 # Все модули загружаются по умолчанию
                 module_states[module_name] = "loaded"
                 # Дампим состояние всех модулей после загрузки каждого
-                save_module_state(module_states)
+                save_modules_states(module_states)
             if module_states.get(module_name, "loaded") != "unloaded":
                 try:
                     await bot.load_extension(f"modules.{module_name}")
@@ -66,20 +66,20 @@ async def load():
                         + Style.RESET_ALL
                         + f" Not working {module_name}: {e}"
                     )
-    save_module_descriptions(module_descriptions)
+    save_modules_descriptions(module_descriptions)
 
 
-def load_module_state():
-    with open("./settings/module_state.yaml", "a+") as file:
+def load_modules_states():
+    with open("./settings/module_state.yaml", "r") as file:
         return yaml.safe_load(file)
 
 
-def save_module_state(state):
+def save_modules_states(state):
     with open("./settings/module_state.yaml", "w+") as file:
         yaml.dump(state, file)
 
 
-def save_module_descriptions(module_descriptions):
+def save_modules_descriptions(module_descriptions):
     file_path = "./settings/module_descriptions.yaml"
     with open(file_path, "w+") as f:
         yaml.dump(module_descriptions, f)
@@ -122,9 +122,9 @@ async def loads(ctx, extension):
             await ctx.send(f"Ошибка при загрузке модуля: {e}")
     else:
         await ctx.send(f"Модуль {extension} не найден.")
-    state = load_module_state()
+    state = load_modules_states()
     state[extension] = "loaded"
-    save_module_state(state)
+    save_modules_states(state)
 
 
 @bot.command(name="unload")
@@ -135,9 +135,9 @@ async def unload(ctx, extension):
         await ctx.send(f"Модуль {extension} выгружен.")
     except Exception as e:
         await ctx.send(f"Ошибка при выгрузке модуля: {e}")
-    state = load_module_state()
+    state = load_modules_states()
     state[extension] = "unloaded"
-    save_module_state(state)
+    save_modules_states(state)
 
 
 async def main():
