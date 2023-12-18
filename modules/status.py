@@ -1,7 +1,7 @@
-import yaml
 import os
 
 import discord
+import yaml
 from discord.ext import commands
 
 

@@ -1,19 +1,16 @@
 # Стандартные библиотеки
 import asyncio
-import yaml
-import logging
 import os
 
-import colorama
-
 # Сторонние библиотеки
+import colorama
 import discord
+import yaml
 from colorama import Fore, Style
 from discord.ext import commands
+from loggers import logger, action_logger
 
-logging.basicConfig(level=logging.INFO)
 colorama.init(autoreset=True)
-logger = logging.getLogger(__name__)
 CONFIG_PATH = os.getenv("DISORD_CONFIG_PATH", "./settings/config.yaml")
 # Load the config file and retrieve the token
 with open(CONFIG_PATH) as config_file:
@@ -28,7 +25,7 @@ intents.messages = True
 intents.members = True
 
 # Create an instance of a bot
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix=CONFIG["bot_prefix"], intents=intents)
 
 
 async def load():
@@ -117,7 +114,9 @@ async def loads(ctx, extension):
     if os.path.isfile(f"./modules/{extension}.py"):
         try:
             await bot.load_extension(f"modules.{extension}")
-            await ctx.send(f"Модуль {extension} загружен.")
+            _text = f"Модуль {extension} загружен."
+            await ctx.send(_text)
+            action_logger.info(_text)
         except Exception as e:
             await ctx.send(f"Ошибка при загрузке модуля: {e}")
     else:
@@ -141,6 +140,7 @@ async def unload(ctx, extension):
 
 
 async def main():
+    action_logger.info("Bot started.")
     await load()
     await bot.start(token)
 
