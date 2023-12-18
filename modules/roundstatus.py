@@ -4,7 +4,7 @@ import time
 import discord
 from discord.ext import commands, tasks
 
-from byond_topic import send
+from byond_topic import queryStatus
 from loggers import logger
 
 
@@ -23,10 +23,13 @@ class Roundstatus(commands.Cog):
     @tasks.loop(seconds=1.0)
     async def round_checker(self):
         try:
-            responseType, responseData = await send("127.0.0.1", 62334, "?status")
+            responseData = await queryStatus("127.0.0.1", 65556)
             logger.info(responseData)
+        except ConnectionRefusedError as ref_ex:
+            logger.info("Сервер выключен.")
+            return
         except Exception as ex:
-            logger.warning(f"Сервер выключен. {ex}")
+            logger.warning(ex, type(ex))
             return
         current_time = int(responseData["round_duration"][0])
         current_gamestate = int(responseData["gamestate"][0])
