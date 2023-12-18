@@ -1,7 +1,9 @@
 import datetime
+import random
 import time
 
 import discord
+from aiohttp import ClientSession
 from discord.ext import commands, tasks
 
 from byond_topic import queryStatus
@@ -23,8 +25,7 @@ class Roundstatus(commands.Cog):
     @tasks.loop(seconds=35.0)
     async def round_checker(self):
         try:
-            responseData = await queryStatus("127.0.0.1", 65556)
-            logger.info(responseData)
+            responseData = await queryStatus("127.0.0.1", 20)
         except ConnectionRefusedError as ref_ex:
             logger.info("Сервер выключен.")
             return
@@ -34,13 +35,18 @@ class Roundstatus(commands.Cog):
         current_time = int(responseData["round_duration"][0])
         current_gamestate = int(responseData["gamestate"][0])
         if self.init and (current_gamestate == self.last_gamestate):
-            # result = requests.get(
-            #     "https://g.tenor.com/v2/search?q=ss13&key=AIzaSyDbkTHFgMmXeEB1U1JPFqycpHw2HujFUhA&limit=20"
-            # )
-            # img = result.json()["results"][random.randint(0, 19)]["media_formats"][
-            #     "gif"
-            # ]["url"]
-            # bot.custom_embed.set_image(url=img)
+            async with ClientSession() as session:
+                async with session.get(
+                    "https://g.tenor.com/v2/search?q=ss13&key=AIzaSyDbkTHFgMmXeEB1U1JPFqycpHw2HujFUhA&limit=20"
+                ) as resp:
+                    if resp.ok:
+                        content = await resp.json()
+                        self.bot.custom_embed.set_image(
+                            url=content["results"][random.randint(0, 19)][
+                                "media_formats"
+                            ]["gif"]["url"]
+                        )
+                    await session.close()
             self.bot.custom_embed.clear_fields()
             self.bot.custom_embed.add_field(
                 name="Количество игроков",
