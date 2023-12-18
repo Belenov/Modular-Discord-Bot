@@ -20,7 +20,7 @@ class Roundstatus(commands.Cog):
     def cog_unload(self):
         self.round_checker.cancel()
 
-    @tasks.loop(seconds=1.0)
+    @tasks.loop(seconds=35.0)
     async def round_checker(self):
         try:
             responseData = await queryStatus("127.0.0.1", 65556)
