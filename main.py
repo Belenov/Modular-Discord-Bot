@@ -8,7 +8,8 @@ import discord
 import yaml
 from colorama import Fore, Style
 from discord.ext import commands
-from loggers import logger, action_logger
+
+from loggers import action_logger, logger
 
 colorama.init(autoreset=True)
 CONFIG_PATH = os.getenv("DISORD_CONFIG_PATH", "./settings/config.yaml")
@@ -25,7 +26,11 @@ intents.messages = True
 intents.members = True
 
 # Create an instance of a bot
-bot = commands.Bot(command_prefix=CONFIG["bot_prefix"], intents=intents)
+bot = commands.Bot(
+    command_prefix=CONFIG["bot_prefix"],
+    case_insensitive=bool(CONFIG.get("case_insensitive", True)),
+    intents=intents,
+)
 
 
 async def load():
