@@ -18,22 +18,31 @@ class Roundstatus(commands.Cog):
         self.channel_id = 1186264489750954034
         self.last_gamestate = -1337
         self.init = False
+        self.is_notification_available_sended = False
 
     def cog_unload(self):
         self.round_checker.cancel()
 
+    def server_availability(self):
+        if self.is_notification_available_sended is True:
+            return
+        logger.warning("Сервер выключен.")
+        self.is_notification_available_sended = True
+
     @tasks.loop(seconds=35.0)
     async def round_checker(self):
+        logger.info("Task Roundstatus launched.")
         try:
             responseData = await queryStatus("127.0.0.1", 20)
+            self.is_notification_available_sended = False
         except ConnectionRefusedError:
-            logger.info("Сервер выключен.")
+            self.server_availability()
             return
         except ConnectionResetError:
             logger.info("Сервер перезапускается.")
             return
-        except ConnectionError:
-            logger.info("C подключением что-то не так.")
+        except ConnectionError as conn_err:
+            logger.info(f"C подключением что-то не так. {conn_err}")
             return
         except Exception as ex:
             logger.warning(ex, type(ex))
@@ -79,17 +88,18 @@ class Roundstatus(commands.Cog):
                 title=f'Статус раунда #{responseData["round_id"][0]}',
                 color=0xFFFF00,
             )
-            if self.channel_id:
+            if self.channel_id is not None and not isinstance(self.channel_id, int):
                 self.bot.custom_embed_message = await self.channel_id.send(
                     embed=self.bot.custom_embed
                 )
-            if self.channel_alert:
+            if self.channel_alert is not None and not isinstance(
+                self.channel_alert, int
+            ):
                 await self.channel_alert.send(
                     f'<@&938048041208905728> Новый раунд на карте {responseData["map_name"][0]}'
                 )
-
-            self.last_gamestate = current_gamestate
-            self.init = True
+        self.last_gamestate = current_gamestate
+        self.init = True
 
     @commands.Cog.listener()
     async def on_ready(self):
