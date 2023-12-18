@@ -26,8 +26,14 @@ class Roundstatus(commands.Cog):
     async def round_checker(self):
         try:
             responseData = await queryStatus("127.0.0.1", 20)
-        except ConnectionRefusedError as ref_ex:
+        except ConnectionRefusedError:
             logger.info("Сервер выключен.")
+            return
+        except ConnectionResetError:
+            logger.info("Сервер перезапускается.")
+            return
+        except ConnectionError:
+            logger.info("C подключением что-то не так.")
             return
         except Exception as ex:
             logger.warning(ex, type(ex))
